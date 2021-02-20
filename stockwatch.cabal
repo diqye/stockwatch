@@ -1,0 +1,145 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 8a41558165ab2cc523ff05e7a8d5d72707f6fbf15fad7d80a204f0a149dd402e
+
+name:           stockwatch
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/stockwatch#readme>
+homepage:       https://github.com/githubuser/stockwatch#readme
+bug-reports:    https://github.com/githubuser/stockwatch/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2020 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/stockwatch
+
+library
+  exposed-modules:
+      DB
+      Gold
+      Message.Input
+      Message.Jin10
+      NatureLang
+      OutputStr
+  other-modules:
+      Paths_stockwatch
+  hs-source-dirs:
+      src
+  build-depends:
+      AppM
+    , aeson
+    , base >=4.7 && <5
+    , base64-bytestring
+    , binary
+    , bytestring
+    , directory
+    , filepath
+    , http-client
+    , http-client-tls
+    , http-types
+    , io-streams
+    , neat-interpolation
+    , network
+    , parsec
+    , scientific
+    , servant
+    , sqlite-simple
+    , string-conversions
+    , telegram-api
+    , text
+    , time
+    , transformers
+    , unordered-containers
+    , websockets
+    , wuss
+    , yaml
+  default-language: Haskell2010
+
+executable stockwatch-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_stockwatch
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      AppM
+    , aeson
+    , base >=4.7 && <5
+    , base64-bytestring
+    , binary
+    , bytestring
+    , directory
+    , filepath
+    , http-client
+    , http-client-tls
+    , http-types
+    , io-streams
+    , neat-interpolation
+    , network
+    , parsec
+    , scientific
+    , servant
+    , sqlite-simple
+    , stockwatch
+    , string-conversions
+    , telegram-api
+    , text
+    , time
+    , transformers
+    , unordered-containers
+    , websockets
+    , wuss
+    , yaml
+  default-language: Haskell2010
+
+test-suite stockwatch-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_stockwatch
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      AppM
+    , aeson
+    , base >=4.7 && <5
+    , base64-bytestring
+    , binary
+    , bytestring
+    , directory
+    , filepath
+    , http-client
+    , http-client-tls
+    , http-types
+    , io-streams
+    , neat-interpolation
+    , network
+    , parsec
+    , scientific
+    , servant
+    , sqlite-simple
+    , stockwatch
+    , string-conversions
+    , telegram-api
+    , text
+    , time
+    , transformers
+    , unordered-containers
+    , websockets
+    , wuss
+    , yaml
+  default-language: Haskell2010
