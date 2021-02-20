@@ -166,7 +166,7 @@ openOrderNow (recent2,recent1) =
           { open_order_desc = candle_desc recent1
           , open_order_price = price
           , open_order_stop_limit = candle_low recent2
-          , open_order_target_profit = (price + (price - candle_low recent2) * 1000)
+          , open_order_target_profit = 1000000
           , open_order_type = Buy
           }
           where price = candle_close recent1 
@@ -174,7 +174,7 @@ openOrderNow (recent2,recent1) =
           { open_order_desc = candle_desc recent1
           , open_order_price = price
           , open_order_stop_limit = candle_high recent2
-          , open_order_target_profit =(price - (candle_high recent2 - price) * 1000)
+          , open_order_target_profit = 0
           , open_order_type = Sell
           }
           where price = candle_close recent1
