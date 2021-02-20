@@ -3,6 +3,7 @@ module Gold where
 
 import Data.Aeson
 import Data.String.Conversions
+-- import Data.HashMap.Strict 
 
 data TimeKind = H1 | H3 | Day deriving Show
 data Candle = Candle
@@ -45,8 +46,8 @@ toCandle (date:price:open:high:low:_) =
   where toFloat :: String -> Float
         toFloat str = read $ filter (/= ',') $ str
 
-readCandle :: IO [Candle]
-readCandle = do
+readCandleFromInvesting :: IO [Candle]
+readCandleFromInvesting = do
   goldcsv <- readFile "data/gold.csv"
   let goldlines = drop 1 $ lines goldcsv
   let goldlines' = reverse goldlines
@@ -57,8 +58,22 @@ readCandle = do
   -- print xs
   pure xs
 
+
+readCandleFromTradingview :: IO [Candle]
+readCandleFromTradingview = do
+  json <- decodeFileStrict "data/gold.csv"
+  let decodeA = toCandle . trans 
+  let xs = map decodeA $ decodeJust json :: [Candle]
+  -- let decodeLine = decode . cs . perfect
+  -- let xs = map decodeLine goldlines' :: [Maybe OriginData]
+  -- print xs
+  pure xs
+  where trans :: [Float] -> [String]
+        trans (x0:x1:x2:x3:x4:x5:xs) = [show x0,show x4,show x1,show x2,show x3]
+
 goldMain = do
-  candles <- readCandle
+  candles <- readCandleFromInvesting
+  -- candles <- readCandleFromTradingview
   traceCandle candles (Nothing,Nothing) (Watching [])
 
 data TraceState = 
@@ -89,6 +104,7 @@ traceCandle (x:xs) (Just aCandle,Just bCandle) (Watching closedOrders)= do
   case a of
     Nothing -> traceCandle xs (Just bCandle,Just x) (Watching closedOrders)
     Just a -> do
+      -- printOpenOrder a
       traceCandle (x:xs) (Just aCandle,Just bCandle) $ (Doing a closedOrders)
 traceCandle (x:xs) (Just aCandle,Just bCandle) (Doing order closedOrders) = do
   case open_order_type order of
@@ -96,34 +112,41 @@ traceCandle (x:xs) (Just aCandle,Just bCandle) (Doing order closedOrders) = do
     Sell -> sellCheck
   where buyCheck | open_order_stop_limit order >= candle_low x = do
           let closedOrder = CloseOrder (open_order_stop_limit order) (open_order_stop_limit order - open_order_price order) (candle_desc x) order
+          putStrLn "--------------Close by SL------------------------"
           printOrder closedOrder
           traceCandle xs (Just bCandle, Just x) (Watching (closedOrder:closedOrders))
                  | open_order_target_profit order <= candle_high x = do
           let closedOrder = CloseOrder (open_order_target_profit order) (open_order_target_profit order - open_order_price order) (candle_desc x) order
-          putStrLn "TP"
+          putStrLn "--------------Close by TP--------------------------"
           printOrder closedOrder
           traceCandle xs (Just bCandle, Just x) (Watching (closedOrder:closedOrders))
-
                  | candle_close x < candle_close aCandle && (candle_close bCandle < candle_close aCandle || isBadCandle bCandle)= do
           let closedOrder = CloseOrder (candle_close x) (candle_close x - open_order_price order) (candle_desc x) order
+          putStrLn "----------------Close by NT------------------------"
           printOrder closedOrder
           traceCandle xs (Just bCandle, Just x) (Watching (closedOrder:closedOrders))
                  | otherwise = traceCandle xs (Just bCandle, Just x) (Doing order closedOrders)
         sellCheck | open_order_stop_limit order <= candle_high x = do
           let closedOrder =  CloseOrder (open_order_stop_limit order) (open_order_price order - open_order_stop_limit order) (candle_desc x) order
+          putStrLn "--------------Close by SL--------------------------"
           printOrder closedOrder
           traceCandle xs (Just bCandle, Just x) (Watching (closedOrder:closedOrders))
                  | open_order_target_profit order >= candle_low x = do
-          putStrLn "TP"
+          putStrLn "----------------Close by TP------------------------"
           let closedOrder = CloseOrder (open_order_target_profit order) (open_order_price order - open_order_target_profit order) (candle_desc x) order
           printOrder closedOrder
           traceCandle xs (Just bCandle, Just x) (Watching (closedOrder:closedOrders))
                  | candle_close x > candle_close aCandle && (isBadCandle bCandle || candle_close bCandle > candle_close aCandle) = do
           let closedOrder = CloseOrder (candle_close x) (open_order_price order - candle_close x) (candle_desc x) order
+          putStrLn "----------------Close by NT-----------------------"
           printOrder closedOrder
           traceCandle xs (Just bCandle, Just x) (Watching (closedOrder:closedOrders))
                  | otherwise = traceCandle xs (Just bCandle, Just x) (Doing order closedOrders)
 
+printOpenOrder :: OpenOrder -> IO ()
+printOpenOrder order = do
+  putStrLn $ (show $ open_order_type $ order) ++ "\t" ++ (show $ open_order_price  $ order) ++ "\tSL " ++ 
+    (show $ open_order_stop_limit  $ order) ++ "\t@ " ++ (open_order_desc order)
 printOrder :: CloseOrder -> IO ()
 printOrder order = do
   putStrLn $ 
@@ -156,7 +179,6 @@ openOrderNow :: (Candle,Candle) -> Maybe OpenOrder
 openOrderNow (recent2,recent1) = 
   case (testMyIdea recent1,testMyIdea recent2) of
     (IdeaRise,IdeaRise) ->
-      -- Nothing
       if candle_close recent1 > candle_close recent2 then Just buyOrder else Nothing
     (IdeaFall,IdeaFall) -> 
       -- Nothing
