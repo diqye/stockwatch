@@ -17,8 +17,8 @@ import Control.Monad.Trans.Maybe
     b. 比特币昨天多少钱     
   2. 特斯拉在1000以上提醒我
 -}
-eitherToMaybeT :: Either a b -> MaybeT IO b
-eitherToMaybeT (Left _) = MaybeT $ pure Nothing
+eitherToMaybeT :: Either P.ParseError b -> MaybeT IO b
+eitherToMaybeT (Left a) = MaybeT $ pure Nothing
 eitherToMaybeT (Right b) = MaybeT $ pure $ Just b
 
 data Stock = 
@@ -29,6 +29,7 @@ data Stock =
     A50 |
     CNH |
     TESLA |
+    GBP | 
     Unknow String
     deriving Show
 
@@ -43,7 +44,7 @@ stockAnalysis = stockAnalysis1 <|> stockAnalysis2
 
 stockAnalysis1 :: P.Parsec String () Analysis
 stockAnalysis1 = do
-    P.try (P.string "我想看") <|> P.string "看一下" <|> P.string "Show" <|> P.string "show"
+    P.string "cnm" <|> P.string "sb"
     P.spaces
     stockP
 
@@ -63,7 +64,9 @@ stockP :: P.Parsec String () Analysis
 stockP = msum 
   [ P.string "黄金" >> stockNow Gold
   , (P.string "Gold" <|> P.string "gold") >> stockNow Gold
+  , (P.string "anndy") >> stockNow Gold
   , (P.string "Silver" <|> P.string "Silver") >> stockNow Silver
+  , (P.string "gbp" <|> P.string "GBP") >> stockNow GBP
   , P.string "白银" >> stockNow Silver
   , P.string "小麦" >> stockNow ZW
   , P.string "美元" >> stockNow DXY

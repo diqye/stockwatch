@@ -23,12 +23,15 @@ import NatureLang
 import Control.Monad
 import System.IO.Unsafe
 import Control.Concurrent.MVar
+import System.IO
 
 threadId :: MVar ThreadId
 threadId =  unsafePerformIO $ newEmptyMVar 
 
 main :: IO ()
 main  = do
+  hSetBuffering stdin LineBuffering
+  hSetBuffering stdout LineBuffering
   a <- forkIO $ runClient $ longPolling 0
   putMVar threadId a
   print a
@@ -70,6 +73,7 @@ sendStockNow DXY = sendStockNow' "https://m.investing.com/indices/usdollar-histo
 sendStockNow A50 = sendStockNow' "https://m.investing.com/indices/china-a50-historical-data"
 sendStockNow CNH = sendStockNow' "https://m.investing.com/currencies/usd-cnh-historical-data"
 sendStockNow TESLA = sendStockNow' "https://m.investing.com/equities/tesla-motors-historical-data"
+sendStockNow GBP = sendStockNow' "https://m.investing.com/currencies/gbp-usd-historical-data"
 
 sendStockNow' :: String -> Int -> MaybeT IO ()
 sendStockNow' url chatId = do

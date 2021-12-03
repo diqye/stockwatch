@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8a41558165ab2cc523ff05e7a8d5d72707f6fbf15fad7d80a204f0a149dd402e
+-- hash: 1be52910ffa06e6000f63c984556c38262f259d381a6d4c5437fa69faa2f6286
 
 name:           stockwatch
 version:        0.1.0.0
@@ -33,6 +33,7 @@ library
       Message.Jin10
       NatureLang
       OutputStr
+      Ploy.PloyMain
   other-modules:
       Paths_stockwatch
   hs-source-dirs:

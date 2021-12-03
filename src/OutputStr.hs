@@ -6,6 +6,7 @@ module OutputStr (
 import System.IO.Unsafe
 import Control.Concurrent
 
+ {-# NOINLINE lock #-} 
 lock = unsafePerformIO $ newMVar ()
 
 output :: String -> IO ()
